@@ -100,15 +100,27 @@ def render_result(skeletons, img, confidence_threshold):
             )
 
 def export_csv(skeleton,img,confidence_threshold):
-    stackarray = ()
+    stackarray0 = ()
+    stackarray1 = ()
     for index, skeleton in enumerate(skeletons):
         limbs = get_valid_limbs(keypoint_ex, skeleton, confidence_threshold)
         for limb in limbs:
-            stackarray = stackarray + limb[0]
-        print(np.asarray(stackarray))
+            if skeleton.id == 0: 
+                stackarray0 = stackarray0 + limb[0]
+            elif skeleton.id == 1:
+                stackarray1 = stackarray1 + limb[0]
+        # print(np.asarray(stackarray))
+        if skeleton.id == 0 :
+            if len(stackarray0) !=0:
+                stackarray0 = (str(skeleton.id), ) + stackarray0
+        elif skeleton.id == 1:
+            if len(stackarray1) !=0:
+                stackarray1 = (str(skeleton.id), ) + stackarray1
+
         with open(r'foo.csv', 'a') as f:
             writer = csv.writer(f)
-            writer.writerow(np.asarray(stackarray))
+            writer.writerow(np.asarray(stackarray0))
+            writer.writerow(np.asarray(stackarray1))
             
 while(True):
     # Capture frame-by-frame
@@ -122,11 +134,14 @@ while(True):
 
     render_result(skeletons, frame, 0.5)
     export_csv(skeletons, frame, 0.5)
+
+    print("Detected skeletons: ", len(skeletons))
+
     # Display the resulting frame
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-#cek
+
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
